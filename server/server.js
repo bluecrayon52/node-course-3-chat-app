@@ -16,15 +16,14 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
     console.log('New user connected'); 
 
-    // custom even emitter on server side sending a custom object
-    socket.emit('newMessage', {
-        from: 'magicMike', 
-        text: 'Hey, do you even lift bro?',
-        createdAt: new Date().getTime()
-    }); 
-
     socket.on('createMessage', (message) => {
         console.log('New Message: ', message); 
+        // send to all users
+        io.emit('newMessage', {
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime()
+        });
     });
 
     socket.on('disconnect', () => {
