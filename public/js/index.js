@@ -9,19 +9,21 @@ socket.on('disconnect', function () {
 
 // custom event listener on client side 
 socket.on('newMessage', function (message) {
-    console.log('New Message: ', message); 
+    var formattedTime = moment(message.createdAt).format('h:mm a');
 
     var li = jQuery('<li></li>');
-    li.text(`${message.from}: ${message.text}`);
+    li.text(`${message.from} ${formattedTime}: ${message.text}`);
     
     jQuery('#messages').append(li); 
 });
 
 socket.on('newLocationMessage', function (message) {
+    var formattedTime = moment(message.createdAt).format('h:mm a');
+
     var li = jQuery('<li></li>');
     // clickable link
     var a = jQuery('<a target="_blank">My current location</a>');
-    li.text(`${message.from}: `);
+    li.text(`${message.from} ${formattedTime}: `);
     // link url 
     a.attr('href', message.url); 
     li.append(a); 
