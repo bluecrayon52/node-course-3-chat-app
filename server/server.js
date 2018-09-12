@@ -13,27 +13,31 @@ var io = socketIO(server);
 
 app.use(express.static(publicPath));
 
-// special event listener
+//--------------------- Connection (listening to client) --------------------- 
 io.on('connection', (socket) => {
     console.log('New user connected'); 
 
-    // this user gets 
+    //---------- emit event (to this user) ---------- 
     socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app')); 
 
-    // every other user gets 
+    //---------- emit event (to other users) ---------- 
     socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined')); 
 
+    //---------- Create Message (listening to client) ---------- 
     socket.on('createMessage', (message, callback) => {
         console.log('New Message: ', message); 
-        // send to all users
+
+        //---------- emit event (to all users) ---------- 
         io.emit('newMessage', generateMessage(message.from, message.text));
         callback('This is from the server.'); 
     });
 
+    //---------- Create Location Message (listening to client) ---------- 
     socket.on('createLocationMessage', (coords) => {
         io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude ,coords.longitude));
     });
 
+    //--------------------- Disconnection (listening to client) --------------------- 
     socket.on('disconnect', () => {
         console.log('user disconnected'); 
     });

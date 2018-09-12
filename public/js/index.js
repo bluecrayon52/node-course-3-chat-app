@@ -7,34 +7,36 @@ socket.on('disconnect', function () {
     console.log('Disconnected from server'); 
 });
 
-// custom event listener on client side 
+//--------------------------- new Message (listening to server) ---------------------------
 socket.on('newMessage', function (message) {
     var formattedTime = moment(message.createdAt).format('h:mm a');
-
-    var li = jQuery('<li></li>');
-    li.text(`${message.from} ${formattedTime}: ${message.text}`);
-    
-    jQuery('#messages').append(li); 
+    var template = jQuery('#message-template').html(); 
+    var html = Mustache.render(template, {
+        text: message.text,
+        from: message.from, 
+        createdAt: formattedTime
+    }); 
+    jQuery('#messages').append(html);
 });
 
+//--------------------------- new Location Message (listening to server)---------------------------
 socket.on('newLocationMessage', function (message) {
     var formattedTime = moment(message.createdAt).format('h:mm a');
-
-    var li = jQuery('<li></li>');
-    // clickable link
-    var a = jQuery('<a target="_blank">My current location</a>');
-    li.text(`${message.from} ${formattedTime}: `);
-    // link url 
-    a.attr('href', message.url); 
-    li.append(a); 
-    jQuery('#messages').append(li); 
+    var template = jQuery('#location-message-template').html(); 
+    var html = Mustache.render(template, {
+        from: message.from, 
+        createdAt: formattedTime,
+        url: message.url
+    }); 
+    jQuery('#messages').append(html); 
 });
 
+//--------------------------- Submit Message (listening to DOM) ---------------------------
 jQuery('#message-form').on('submit', function (e) {
     e.preventDefault(); // stop default form behavior 
-
     var messageTextbox = jQuery('[name=message]');
 
+    //---------- emit event (to server) ----------
     socket.emit('createMessage', {
         from: 'User', 
         text: messageTextbox.val()
@@ -43,7 +45,7 @@ jQuery('#message-form').on('submit', function (e) {
     }); 
 });
 
-// click listener for send location button 
+//--------------------------- Share Location (listening to DOM) ---------------------------
 var locationButton = jQuery('#send-location'); 
 locationButton.on('click', function () {
     // check access to geolocation API 
@@ -59,6 +61,8 @@ locationButton.on('click', function () {
         // success 
         // reset button
         locationButton.removeAttr('disabled').text('Send location'); 
+        
+        //---------- emit event (to server) ----------
         socket.emit('createLocationMessage', {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude  
