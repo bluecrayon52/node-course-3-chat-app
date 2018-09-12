@@ -13,6 +13,7 @@ describe('', () => {
 
 */
 
+// synchronous, no need to call done 
 describe('generateMessage', () => {
     it('should generate correct message object', () => {
         var from = 'Bob';
