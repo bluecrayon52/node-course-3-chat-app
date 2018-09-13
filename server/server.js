@@ -47,16 +47,23 @@ io.on('connection', (socket) => {
 
     //---------- Create Message (listening to client) ---------- 
     socket.on('createMessage', (message, callback) => {
-        console.log('New Message: ', message); 
+        var user = users.getUser(socket.id); 
 
-        //---------- emit event (to all users) ---------- 
-        io.emit('newMessage', generateMessage(message.from, message.text));
+        if (user && isRealString(message.text)) {
+            //---------- emit event (to all users in room) ---------- 
+            io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+        }
         callback('This is from the server.'); 
     });
 
     //---------- Create Location Message (listening to client) ---------- 
     socket.on('createLocationMessage', (coords) => {
-        io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude ,coords.longitude));
+        var user = users.getUser(socket.id); 
+
+        if (user) {
+        //------------------------ emit events (to all users in room)
+        io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude ,coords.longitude));
+        }
     });
 
     //--------------------- Disconnection (listening to client) --------------------- 

@@ -77,7 +77,6 @@ jQuery('#message-form').on('submit', function (e) {
 
     //---------- emit event (to server) ----------
     socket.emit('createMessage', {
-        from: 'User', 
         text: messageTextbox.val()
     }, function () {
         messageTextbox.val(''); // wipe the box
